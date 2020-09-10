@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="x5-orientation" content="portrait" />
+  <meta name="screen-orientation" content="portrait" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <link rel="stylesheet" href="https://statics.ys7.com/openweb/page/jssdk/live-d4ca2b8ea2.css" />
+  <title>轻应用视频</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #playWind {
+      background: black;
+    }
+
+    .btn-item {
+      font-size: 0.24rem;
+    }
+
+    .loading-item div {
+      font-size: 0.18rem;
+    }
+  </style>
+  <script>
+      !(function (e) {
+          function t(a) {
+              if (i[a]) return i[a].exports;
+              var n = (i[a] = { exports: {}, id: a, loaded: !1 });
+              return e[a].call(n.exports, n, n.exports, t), (n.loaded = !0), n.exports;
+          }
+          var i = {};
+          return (t.m = e), (t.c = i), (t.p = ""), t(0);
+      })([
+          function (e, t) {
+              "use strict";
+              Object.defineProperty(t, "__esModule", { value: !0 });
+              var i = window;
+              (t["default"] = i.flex = function (normal, e, t) {
+                  var a = e || 100,
+                      n = t || 1,
+                      r = i.document,
+                      o = navigator.userAgent,
+                      d = o.match(/Android[\S\s]+AppleWebkit\/(\d{3})/i),
+                      l = o.match(/U3\/((\d+|\.){5,})/i),
+                      c = l && parseInt(l[1].split(".").join(""), 10) >= 80,
+                      p = navigator.appVersion.match(/(iphone|ipad|ipod)/gi),
+                      s = i.devicePixelRatio || 1;
+                  p || (d && d[1] > 534) || c || (s = 1);
+                  var u = normal ? 1 : 1 / s,
+                      m = r.querySelector('meta[name="viewport"]');
+                  m || ((m = r.createElement("meta")), m.setAttribute("name", "viewport"), r.head.appendChild(m)),
+                      m.setAttribute(
+                          "content",
+                          "width=device-width,user-scalable=no,initial-scale=" + u + ",maximum-scale=" + u + ",minimum-scale=" + u
+                      ),
+                      (r.documentElement.style.fontSize = normal ? "50px" : (a / 2) * s * n + "px");
+              }),
+                  (e.exports = t["default"]);
+          }
+      ]);
+      flex(false, 100, 1);
+  </script>
+</head>
+
+<body>
+<script>
+    var staticDomain = "https://statics.ys7.com/openweb";
+    var csrftoken = "";
+    var decoder;
+    var isFullScreen = false;
+</script>
+<script src="ezuikit.js"></script>
+<div id="playWind"></div>
+<div class="btn-container">
+    <span class="btn-item" id="play" data-click-dclog="100">
+      <img src="https://statics.ys7.com/openweb/page/jssdk/imgs/play-68605cae88.png" />
+      <div>播放</div>
+    </span>
+  <span class="btn-item " id="stop" data-click-dclog="101">
+      <img src="https://statics.ys7.com/openweb/page/jssdk/imgs/stop-f564b1d4c5.png" />
+      <div>停止</div>
+    </span>
+  <span class="btn-item" id="quanping" data-click-dclog="102">
+      <img style="width: 50%" src="https://statics.ys7.com/openweb/page/jssdk/imgs/fullScreen-afb6282dc3.png" />
+      <div>全屏</div>
+    </span>
+</div>
+<script src="https://statics.ys7.com/openweb/common/scripts/jquery-29578c8c59.min.js"></script>
+<script src="https://statics.ys7.com/openweb/common/scripts/jquery-39b5fb0510.cookie.js"></script>
+<script src="https://statics.ys7.com/openweb/common/scripts/model-7ac7f323ca.js"></script>
+<script id="seajsnode" src="https://statics.ys7.com/openweb/common/scripts/sea-8524c8fd77.js"></script>
+<script src="https://statics.ys7.com/openweb/assets/layer/layer-a70a2261a4.js"></script>
+<script>
+    var userName = $.cookie("ASG_DisplayName");
+    function handleError(e) {
+        console.log("捕获到错误", e);
+    }
+    function handleSuccess() {
+        console.log("播放成功回调函数，此处可执行播放成功后续动作");
+        document.getElementById('playWind').addEventListener('touchstart', function () {
+            console.log("双击")
+            return false;
+        });
+    }
+    var deviceSerial = getQueryString("deviceSerial");
+    var channelNo = getQueryString("channelNo");
+    var accessToken = getQueryString("accessToken");
+    var autoplay = getQueryString("autoplay");
+    var validCode = getQueryString("validCode");
+    var audioId = getQueryString("audio") == "1" ? 0 : -1;
+    var hd = getQueryString("hd");
+
+    var url = "ezopen://" + (validCode ? validCode + "@" : "") + "open.ys7.com/" + deviceSerial + "/" + channelNo;
+    hd && hd == "1" ? (url += ".hd.live") : (url += ".live");
+
+    var width = document.body.offsetWidth;
+
+    $("#playWind").height(width * (9 / 16));
+
+    if (autoplay == 1) {
+        init();
+        $("#play").hide();
+        $("#stop").show();
+    } else {
+        $("#play").show();
+        $("#stop").hide();
+    }
+    function init() {
+        try {
+            decoder.stop();
+        } catch (e) {
+            console.log("E", e);
+        }
+
+        decoder = new EZUIKit.EZUIPlayer({
+            id: "playWind",
+            autoplay: true,
+            audioId: audioId,
+            isSupporDoubleClickFull: false,
+            url: url,
+            accessToken: accessToken,
+            decoderPath: "/assets/ezuikit_v2.6.4",
+            width: width,
+            height: width * (9 / 16),
+            handleSuccess: handleSuccess,
+            handleError: handleError,
+            env: {
+                //domain: window.location.protocol + '//' + window.location.host
+                domain: "https://open.ys7.com"
+            }
+        });
+    }
+    $("#play").click(function (e) {
+        init();
+        actionLog(e);
+        $("#play").hide();
+        $("#stop").show();
+    });
+
+    $("#stop").click(function (e) {
+        decoder.stop(0);
+        actionLog(e);
+        $("#play").show();
+        $("#stop").hide();
+    });
+    $("#quanping").click(function (e) {
+        // decoder.fullScreen(true);
+        layer.msg("请允许手机横屏并横置手机")
+        // quanping();
+        actionLog(e);
+    });
+    $("#openSound").click(function () {
+        decoder.openSound();
+    });
+    function getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)")
+        var baseurl='https://open.ys7.com/ezopen/h5/live'
+        var url='?autoplay=1&accessToken=at.3r8ksddd3jmackz40urz4f25dceek4ui-2307rvtaut-0q30bak-wjhe5qzdv&deviceSerial=D59259947&channelNo=1'
+        console.log(url.substr(1))
+        var r = url.substr(1).match(reg);
+
+        if (r != null) return unescape(r[2]);
+        return null;
+    }
+    function quanping() {
+        if (!isFullScreen) {
+            console.log("准备全屏，获取浏览器宽高");
+            var width = document.documentElement.clientWidth;
+            var height = document.documentElement.clientHeight;
+            console.log("宽，高", width, height);
+            $("#playWind").width(height);
+            $("#playWind").height(width);
+            $("#playWind").css("position", "absolute");
+            $("#playWind").css("top", (height - width) / 2);
+            $("#playWind").css("left", 0 - (height - width) / 2);
+            $("#playWind").css("transform", "rotate(90deg)");
+            $("#playWind").css("transform-origin", "50% 50%");
+            $("#playWind").css("z-index", "100");
+            decoder.reSize(height, width);
+            isFullScreen = true;
+        }
+    }
+    function cancelQuanping() {
+        if (isFullScreen) {
+            var width = document.documentElement.clientWidth;
+            var height = document.documentElement.clientHeight;
+            console.log("宽，高", width, height);
+            $("#playWind").width(width);
+            $("#playWind").height(height);
+            $("#playWind").css("position", "relative");
+            $("#playWind").css("top", 0);
+            $("#playWind").css("left", 0);
+            $("#playWind").css("transform", "rotate(0deg)");
+            $("#playWind").css("transform-origin", "50% 50%");
+            $("#playWind").css("z-index", "100");
+            decoder.reSize(width, (width * 9) / 16);
+            isFullScreen = false;
+        }
+    }
+    // 取消全屏
+    $("#playWind").click(function () {
+        cancelQuanping();
+    });
+    $(function () {
+        pushHistory();
+        window.addEventListener(
+            "popstate",
+            function (e) {
+                //alert("我监听到了浏览器的返回按钮事件啦");//根据自己的需求实现自己的功能
+                cancelQuanping();
+            },
+            false
+        );
+        function pushHistory() {
+            var state = {
+                title: "title",
+                url: "#"
+            };
+            window.history.pushState(state, "title", "#");
+        }
+    });
+    dclog("https://log.ys7.com/statistics.do?systemName=open_web_btn_action&bn=12&action=0&un=" + userName);
+    function actionLog(e) {
+        var extra = "";
+        if (e && e.currentTarget && e.currentTarget.getAttribute("data-click-dclog")) {
+            extra = e.currentTarget.getAttribute("data-click-dclog");
+        }
+        dclog(
+            "https://log.ys7.com/statistics.do?systemName=open_web_btn_action&bn=10&action=0&un=" + userName + "&extra=" + extra
+        );
+    }
+    function dclog(dclogUrl) {
+        // 上报一次本地统计信息
+        const img = new Image();
+        img.src = dclogUrl;
+    }
+</script>
+<script>
+    // 阻止横屏切换
+    function orient() {
+        if (window.orientation == 0 || window.orientation == 180) {
+            $("body").attr("class", "portrait");
+            orientation = 'portrait';
+            exitFullscreen()
+            setTimeout(() => {
+                var width = document.documentElement.clientWidth;
+                var height = width * 9 / 16;
+                $("#playWind").width(height);
+                $("#playWind").height(width);
+                $("#playWind").css('position', 'relative');
+                decoder.reSize(width, width * 9 / 16);
+            }, 300)
+        }
+        else if (window.orientation == 90 || window.orientation == -90) {
+            $("body").attr("class", "landscape");
+            decoder.fullScreen(true);
+            orientation = 'landscape';
+            if (decoder) {
+                setTimeout(() => {
+                    var width = document.documentElement.clientWidth;
+                    var height = document.documentElement.clientHeight;
+                    $("#playWind").width(width);
+                    $("#playWind").height(height);
+                    $("#playWind").css('position', 'absolute');
+                    $("#playWind").css('top', 0);
+                    $("#playWind").css('left', 0);
+                    $("#playWind").css('z-index', '100');
+                    if (isFullScreen) {
+                        $("#playWind").css('transform', 'rotate(0deg)');
+                        $("#playWind").css('transform-origin', '50% 50%');
+                        isFullScreen = false;
+                    }
+                    decoder.reSize(width, height);
+                }, 300)
+
+            }
+            $("body").css('overflow', 'hidden');
+            return false;
+        }
+    }
+    $(window).bind('orientationchange', function (e) {
+        orient();
+    });
+    function getMaxValue(num1, num2, num3) {
+        var value = 0;
+        if (num1 >= num2) {
+            value = num1;
+        } else {
+            value = num2;
+        }
+        if (value < num3) {
+            value = num3;
+        }
+        return value;
+    }
+    //退出全屏
+    function exitFullscreen() {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        }
+    }
+</script>
+</body>
+
+</html>
